@@ -26,7 +26,7 @@ public class ItemService {
     public Item update(Item item, Long userId) {
         userService.findById(userId); //throws exception if user does not exist
         Item existingItem = itemRepository.findById(item.getId())
-                .orElseThrow(()-> new ItemNotFoundException(item.getId()));
+                .orElseThrow(() -> new ItemNotFoundException(item.getId()));
         if (!existingItem.getOwner().getId().equals(userId)) {
             throw new UserIsNotOwnerException(userId, item.getId());
         }
