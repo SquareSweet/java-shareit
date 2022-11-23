@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.common.exceptions.EmailNotUniqueException;
 import ru.practicum.shareit.common.exceptions.UserNotFoundException;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
 
@@ -17,6 +19,7 @@ public class UserService {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new EmailNotUniqueException(user.getEmail());
         }
+        log.info("Create user id: {}", user.getId());
         return userRepository.save(user);
     }
 
@@ -33,6 +36,7 @@ public class UserService {
             existingUser.setName(user.getName());
         }
 
+        log.info("Update user id: {}", user.getId());
         return userRepository.update(existingUser);
     }
 
@@ -46,5 +50,6 @@ public class UserService {
 
     public void deleteById(Long id) {
         userRepository.deleteById(id);
+        log.info("Delete user id: {}", id);
     }
 }

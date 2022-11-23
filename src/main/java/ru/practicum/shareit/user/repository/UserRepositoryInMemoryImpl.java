@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.repository;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.common.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;
@@ -49,7 +50,11 @@ public class UserRepositoryInMemoryImpl implements UserRepository {
 
     @Override
     public void deleteById(Long id) {
-        users.remove(id);
+        if (users.containsKey(id)) {
+            users.remove(id);
+        } else {
+            throw new UserNotFoundException(id);
+        }
     }
 
     @Override

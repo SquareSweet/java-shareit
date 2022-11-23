@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.common.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.common.exceptions.UserIsNotOwnerException;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
@@ -20,6 +22,7 @@ public class ItemService {
         User owner = userService.findById(userId); //throws exception if user does not exist
         item.setOwner(owner);
         item.setAvailable(true);
+        log.info("Create item id: {}", item.getId());
         return itemRepository.save(item);
     }
 
@@ -40,6 +43,7 @@ public class ItemService {
             existingItem.setAvailable(item.getAvailable());
         }
 
+        log.info("Update item id: {}", item.getId());
         return itemRepository.update(existingItem);
     }
 
@@ -60,5 +64,6 @@ public class ItemService {
 
     public void deleteById(Long id) {
         itemRepository.deleteById(id);
+        log.info("Delete item id: {}", id);
     }
 }

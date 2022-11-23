@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.common.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.Item;
 
 import java.util.*;
@@ -50,7 +51,11 @@ public class ItemRepositoryInMemoryImpl implements ItemRepository {
 
     @Override
     public void deleteById(Long id) {
-        items.remove(id);
+        if (items.containsKey(id)) {
+            items.remove(id);
+        } else {
+            throw new ItemNotFoundException(id);
+        }
     }
 
     @Override
