@@ -22,8 +22,9 @@ public class ItemService {
         User owner = userService.findById(userId); //throws exception if user does not exist
         item.setOwner(owner);
         item.setAvailable(true);
+        item = itemRepository.save(item);
         log.info("Create item id: {}", item.getId());
-        return itemRepository.save(item);
+        return item;
     }
 
     public Item update(Item item, Long userId) {
@@ -44,7 +45,7 @@ public class ItemService {
         }
 
         log.info("Update item id: {}", item.getId());
-        return itemRepository.update(existingItem);
+        return itemRepository.save(existingItem);
     }
 
     public Item findById(Long id) {
@@ -52,7 +53,7 @@ public class ItemService {
     }
 
     public List<Item> findByOwner(Long userId) {
-        return itemRepository.findByOwner(userId);
+        return itemRepository.findByOwnerId(userId);
     }
 
     public List<Item> findByText(String text) {

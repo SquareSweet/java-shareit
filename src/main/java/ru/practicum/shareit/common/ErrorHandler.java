@@ -3,7 +3,6 @@ package ru.practicum.shareit.common;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.common.exceptions.EmailNotUniqueException;
 import ru.practicum.shareit.common.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.common.exceptions.UserIsNotOwnerException;
 import ru.practicum.shareit.common.exceptions.UserNotFoundException;
@@ -12,10 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import java.io.IOException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler(EmailNotUniqueException.class)
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public void handleConflict(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.CONFLICT.value());
     }
