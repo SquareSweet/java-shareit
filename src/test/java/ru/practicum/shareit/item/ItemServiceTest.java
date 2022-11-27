@@ -8,7 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.common.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.common.exceptions.UserIsNotOwnerException;
 import ru.practicum.shareit.common.exceptions.UserNotFoundException;
-import ru.practicum.shareit.item.dto.ItemDtoBooking;
+import ru.practicum.shareit.item.dto.ItemDtoOut;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
@@ -68,8 +68,8 @@ class ItemServiceTest {
     @Test
     void createTest() {
         itemService.create(item1, user1.getId());
-        ItemDtoBooking actualItem = itemService.findById(1L, user2.getId());
-        assertEquals(ItemMapper.toItemDtoBooking(item1), actualItem);
+        ItemDtoOut actualItem = itemService.findById(1L, user2.getId());
+        assertEquals(ItemMapper.toItemDtoOut(item1), actualItem);
     }
 
     @Test

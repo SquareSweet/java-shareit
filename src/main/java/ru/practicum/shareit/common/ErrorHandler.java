@@ -29,7 +29,8 @@ public class ErrorHandler {
         response.sendError(HttpStatus.NOT_FOUND.value());
     }
 
-    @ExceptionHandler({ValidationException.class, ConstraintViolationException.class, ItemNotAvailableException.class})
+    @ExceptionHandler({ValidationException.class, ConstraintViolationException.class, ItemNotAvailableException.class,
+            ItemNeverBookedByUserException.class})
     public void handleBadRequest(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value());
     }
