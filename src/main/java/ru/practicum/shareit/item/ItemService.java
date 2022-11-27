@@ -3,19 +3,30 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.common.exceptions.ItemNotAvailableException;
 import ru.practicum.shareit.common.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.common.exceptions.UserIsNotOwnerException;
+import ru.practicum.shareit.item.dto.ItemDtoBooking;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ItemService {
     private final ItemRepository itemRepository;
+    private final BookingRepository bookingRepository;
     private final UserService userService;
 
     public Item create(Item item, Long userId) {
@@ -48,12 +59,43 @@ public class ItemService {
         return itemRepository.save(existingItem);
     }
 
-    public Item findById(Long id) {
-        return itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
+    public ItemDtoBooking findById(Long id, Long userId) {
+        return fillBookings(ItemMapper.toItemDtoBooking(
+                itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id))
+        ), userId);
     }
 
-    public List<Item> findByOwner(Long userId) {
-        return itemRepository.findByOwnerId(userId);
+    private ItemDtoBooking fillBookings(ItemDtoBooking item, Long userId) {
+        if (item.getOwner().getId().equals(userId)) {
+            List<Booking> itemBookings = bookingRepository.findByItemIdAndStatus(item.getId(), BookingStatus.APPROVED);
+            Optional<Booking> nextBooking = itemBookings.stream()
+                    .filter(i -> i.getStart().isAfter(LocalDateTime.now()))
+                    .min(Comparator.comparing(Booking::getStart));
+            Optional<Booking> lastBooking = itemBookings.stream()
+                    .filter(i -> i.getEnd().isBefore(LocalDateTime.now()))
+                    .max(Comparator.comparing(Booking::getEnd));
+            nextBooking.ifPresent(booking -> item.setNextBooking(BookingMapper.toBookingDtoShort(booking)));
+            lastBooking.ifPresent(booking -> item.setLastBooking(BookingMapper.toBookingDtoShort(booking)));
+        }
+        return item;
+    }
+
+    public Item findForBookingById(Long id, Long bookerId) {
+        Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
+        if (item.getOwner().getId().equals(bookerId)) {
+            throw new ItemNotFoundException(id);
+        } else if (!item.getAvailable()) {
+            throw new ItemNotAvailableException(id);
+        } else {
+            return item;
+        }
+    }
+
+    public List<ItemDtoBooking> findByOwner(Long userId) {
+        return itemRepository.findByOwnerId(userId).stream()
+                .map(ItemMapper::toItemDtoBooking)
+                .map(i -> fillBookings(i, userId))
+                .collect(Collectors.toList());
     }
 
     public List<Item> findByText(String text) {
