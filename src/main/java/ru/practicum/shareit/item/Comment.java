@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(exclude = {"item", "author"})
+@ToString(exclude = {"item", "author"})
 @Entity
 @Table(name = "comments")
 public class Comment {

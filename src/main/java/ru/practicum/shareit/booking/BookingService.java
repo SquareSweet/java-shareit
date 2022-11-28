@@ -30,7 +30,6 @@ public class BookingService {
             log.info("Create item id: {}", booking.getId());
             return booking;
         } else {
-            log.error("Booking creation fail: start date is after end date");
             throw new ValidationException("Booking start date is after end date");
         }
     }
@@ -62,11 +61,9 @@ public class BookingService {
                 case FUTURE:
                     return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
                 default:
-                    log.error("Unknown booking status: {} when finding by booker", status);
                     throw new IllegalArgumentException("Unknown booking status: " + status);
             }
         } catch (IllegalArgumentException e) {
-            log.error("Unknown booking status: {} when finding by owner", status);
             throw new IllegalArgumentException("Unknown state: " + status);
         }
     }
@@ -95,7 +92,6 @@ public class BookingService {
                     throw new IllegalArgumentException("Unknown state: " + status);
             }
         } catch (IllegalArgumentException e) {
-            log.error("Unknown booking status: {} when finding by owner", status);
             throw new IllegalArgumentException("Unknown state: " + status);
         }
     }
@@ -104,7 +100,6 @@ public class BookingService {
         Booking booking = bookingRepository.findByIdAndItemOwnerId(id, ownerId)
                 .orElseThrow(() -> new BookingNotFoundException(id));
         if (booking.getStatus().equals(BookingStatus.APPROVED)) {
-            log.error("Booking id: {} is already approved", id);
             throw new IllegalArgumentException("Booking id: " + id + " is already approved");
         }
         if (!booking.getItem().getOwner().getId().equals(ownerId)) {
