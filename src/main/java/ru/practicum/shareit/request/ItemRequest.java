@@ -1,17 +1,20 @@
 package ru.practicum.shareit.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"items", "requester"})
+@ToString(exclude = {"items", "requester"})
 @Entity
 @Table(name = "requests")
 public class ItemRequest {
@@ -25,4 +28,10 @@ public class ItemRequest {
     @ManyToOne
     @JoinColumn(name = "requester_id", referencedColumnName = "id")
     private User requester;
+
+    private LocalDateTime created;
+
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "request")
+    private List<Item> items = new ArrayList<>();
 }
