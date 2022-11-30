@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = {"item", "author"})
@@ -17,18 +19,18 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(nullable = false)
-    private String text;
+    String text;
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    private Item item;
+    Item item;
 
     @ManyToOne
     @JoinColumn(name = "author_id")
-    private User author;
+    User author;
 
-    private LocalDateTime created;
+    LocalDateTime created;
 }

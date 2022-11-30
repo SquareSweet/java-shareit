@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Data
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = {"items", "requester"})
@@ -20,18 +22,18 @@ import java.util.List;
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(nullable = false)
-    private String description;
+    String description;
 
     @ManyToOne
     @JoinColumn(name = "requester_id", referencedColumnName = "id")
-    private User requester;
+    User requester;
 
-    private LocalDateTime created;
+    LocalDateTime created;
 
     @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "request")
-    private List<Item> items = new ArrayList<>();
+    List<Item> items = new ArrayList<>();
 }

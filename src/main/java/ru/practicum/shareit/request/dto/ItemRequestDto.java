@@ -1,7 +1,9 @@
 package ru.practicum.shareit.request.dto;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.user.User;
 
@@ -11,11 +13,12 @@ import java.util.List;
 
 @Data
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRequestDto {
-    private Long id;
+    Long id;
     @NotBlank(message = "Request description should not be blank")
-    private String description;
-    private User requester;
-    private LocalDateTime created;
-    private List<ItemDtoRequest> items;
+    String description;
+    User requester;
+    LocalDateTime created;
+    List<ItemDtoRequest> items;
 }
