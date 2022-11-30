@@ -6,7 +6,7 @@ import org.springframework.data.domain.Sort;
 public class OffsetPageRequest extends PageRequest {
 
     protected OffsetPageRequest(int offset, int size, Sort sort) {
-        super(offset/size, size, sort);
+        super(offset / size, size, sort);
     }
 
     public static OffsetPageRequest of(int offset, int size, Sort sort) {
