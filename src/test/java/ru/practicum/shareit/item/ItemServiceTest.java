@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.common.OffsetPageRequest;
 import ru.practicum.shareit.common.exceptions.*;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -131,9 +132,11 @@ class ItemServiceTest {
 
     @Test
     void findByOwnerTest() {
-        Mockito.when(mockItemRepository.findByOwnerId(1L)).thenReturn(List.of(item1));
-        assertEquals(List.of(ItemMapper.toItemDtoOut(item1)), itemService.findByOwner(1L));
-        Mockito.verify(mockItemRepository, Mockito.times(1)).findByOwnerId(1L);
+        Mockito.when(mockItemRepository.findByOwnerId(1L, OffsetPageRequest.of(0, 20)))
+                .thenReturn(List.of(item1));
+        assertEquals(List.of(ItemMapper.toItemDtoOut(item1)), itemService.findByOwner(1L, 0, 20));
+        Mockito.verify(mockItemRepository, Mockito.times(1))
+                .findByOwnerId(1L, OffsetPageRequest.of(0, 20));
     }
 
     @Test
@@ -154,15 +157,17 @@ class ItemServiceTest {
 
     @Test
     void findByTextTest() {
-        Mockito.when(mockItemRepository.findByText("Item1")).thenReturn(List.of(item2));
-        assertEquals(List.of(item2), itemService.findByText("Item1"));
-        Mockito.verify(mockItemRepository, Mockito.times(1)).findByText("Item1");
+        Mockito.when(mockItemRepository.findByText("Item1", OffsetPageRequest.of(0, 20)))
+                .thenReturn(List.of(item2));
+        assertEquals(List.of(item2), itemService.findByText("Item1", 0, 20));
+        Mockito.verify(mockItemRepository, Mockito.times(1))
+                .findByText("Item1", OffsetPageRequest.of(0, 20));
     }
 
     @Test
     void findByTextEmptyTest() {
-        assertEquals(List.of(), itemService.findByText(""));
-        Mockito.verify(mockItemRepository, Mockito.never()).findByText(Mockito.anyString());
+        assertEquals(List.of(), itemService.findByText("", 0, 20));
+        Mockito.verify(mockItemRepository, Mockito.never()).findByText(Mockito.anyString(), Mockito.any(OffsetPageRequest.class));
     }
 
     @Test

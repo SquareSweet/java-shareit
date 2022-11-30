@@ -2,9 +2,9 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.common.OffsetPageRequest;
 import ru.practicum.shareit.common.exceptions.ItemRequestNotFound;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
@@ -41,6 +41,7 @@ public class ItemRequestService {
 
     public List<ItemRequest> findAll(Long userId, int from, int size) {
         userService.findById(userId); //throws exception if user does not exist
-        return requestRepository.findByRequesterIdNot(userId, PageRequest.of(from, size, Sort.by("created")));
+        return requestRepository.findByRequesterIdNot(userId,
+                OffsetPageRequest.of(from, size, Sort.by("created")));
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import ru.practicum.shareit.common.OffsetPageRequest;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -31,7 +32,7 @@ class ItemRepositoryTest {
                 .owner(userRepository.getReferenceById(1L))
                 .available(true)
                 .build());
-        List<Item> items = itemRepository.findByText("nameKeyword");
+        List<Item> items = itemRepository.findByText("nameKeyword", OffsetPageRequest.of(0, 20));
         assertEquals(1, items.size());
         assertEquals(expectedItems, items);
     }
@@ -45,7 +46,7 @@ class ItemRepositoryTest {
                 .owner(userRepository.getReferenceById(1L))
                 .available(true)
                 .build());
-        List<Item> items = itemRepository.findByText("descriptionKeyword");
+        List<Item> items = itemRepository.findByText("descriptionKeyword", OffsetPageRequest.of(0, 20));
         assertEquals(1, items.size());
         assertEquals(expectedItems, items);
     }
@@ -67,8 +68,8 @@ class ItemRepositoryTest {
                         .owner(userRepository.getReferenceById(1L))
                         .available(true)
                         .build());
-        List<Item> items = itemRepository.findByText("keyword");
-        assertEquals(2, itemRepository.findByText("Keyword").size());
+        List<Item> items = itemRepository.findByText("keyword", OffsetPageRequest.of(0, 20));
+        assertEquals(2, items.size());
         assertEquals(expectedItems, items);
     }
 }

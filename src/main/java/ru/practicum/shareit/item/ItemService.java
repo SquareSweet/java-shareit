@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.common.OffsetPageRequest;
 import ru.practicum.shareit.common.exceptions.ItemNeverBookedByUserException;
 import ru.practicum.shareit.common.exceptions.ItemNotAvailableException;
 import ru.practicum.shareit.common.exceptions.ItemNotFoundException;
@@ -97,19 +98,19 @@ public class ItemService {
         }
     }
 
-    public List<ItemDtoOut> findByOwner(Long userId) {
-        return itemRepository.findByOwnerId(userId).stream()
+    public List<ItemDtoOut> findByOwner(Long userId, int from, int size) {
+        return itemRepository.findByOwnerId(userId, OffsetPageRequest.of(from, size)).stream()
                 .map(ItemMapper::toItemDtoOut)
                 .map(i -> fillBookings(i, userId))
                 .map(i -> fillComments(i))
                 .collect(Collectors.toList());
     }
 
-    public List<Item> findByText(String text) {
+    public List<Item> findByText(String text, int from, int size) {
         if (text == null || text.isBlank()) {
             return List.of();
         }
-        return itemRepository.findByText(text);
+        return itemRepository.findByText(text, OffsetPageRequest.of(from, size));
     }
 
     public Comment addComment(Long itemId, Long userId, Comment comment) {

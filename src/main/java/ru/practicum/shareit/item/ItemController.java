@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.dto.ItemDtoOut;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -39,13 +40,17 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoOut> findByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.findByOwner(userId);
+    public List<ItemDtoOut> findByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                        @RequestParam Optional<Integer> from,
+                                        @RequestParam Optional<Integer> size) {
+        return itemService.findByOwner(userId, from.orElse(0), size.orElse(20));
     }
 
     @GetMapping("/search")
-    public List<ItemDto> find(@RequestParam String text) {
-        return itemService.findByText(text).stream()
+    public List<ItemDto> find(@RequestParam String text,
+                              @RequestParam Optional<Integer> from,
+                              @RequestParam Optional<Integer> size) {
+        return itemService.findByText(text, from.orElse(0), size.orElse(20)).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
