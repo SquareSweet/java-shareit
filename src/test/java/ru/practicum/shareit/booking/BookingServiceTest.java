@@ -65,10 +65,6 @@ class BookingServiceTest {
                 .build();
         Mockito.when(mockUserService.findById(1L)).thenReturn(owner);
         Mockito.when(mockUserService.findById(2L)).thenReturn(booker);
-        Mockito.when(mockItemService.findForBookingById(1L, 2L)).thenReturn(item);
-        Mockito.when(mockRepository.save(booking)).thenReturn(booking);
-        Mockito.when(mockRepository.findById(1L)).thenReturn(Optional.of(booking));
-        Mockito.when(mockRepository.findByIdAndOwnerOrBooker(1L, 1L)).thenReturn(Optional.of(booking));
         Mockito.when(mockRepository.findByIdAndItemOwnerId(eq(1L), Mockito.anyLong())).thenReturn(Optional.of(booking));
 
         from = 0;
@@ -78,6 +74,8 @@ class BookingServiceTest {
 
     @Test
     void createTest() {
+        Mockito.when(mockItemService.findForBookingById(1L, 2L)).thenReturn(item);
+        Mockito.when(mockRepository.save(booking)).thenReturn(booking);
         assertEquals(booking, bookingService.create(booking, 1L));
         Mockito.verify(mockRepository, Mockito.times(1)).save(booking);
     }
@@ -91,6 +89,7 @@ class BookingServiceTest {
 
     @Test
     void findByIdTest() {
+        Mockito.when(mockRepository.findByIdAndOwnerOrBooker(1L, 1L)).thenReturn(Optional.of(booking));
         assertEquals(booking, bookingService.findById(1L, 1L));
         Mockito.verify(mockRepository, Mockito.times(1))
                 .findByIdAndOwnerOrBooker(1L, 1L);
