@@ -2,8 +2,11 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.common.OffsetPageRequest;
 import ru.practicum.shareit.common.exceptions.BookingNotFoundException;
 import ru.practicum.shareit.common.exceptions.UserIsNotOwnerException;
 import ru.practicum.shareit.item.ItemService;
@@ -40,26 +43,29 @@ public class BookingService {
                 .orElseThrow(() -> new BookingNotFoundException(id));
     }
 
-    public List<Booking> findByBooker(Long userId, String status) {
+    public List<Booking> findByBooker(Long userId, String status, int from, int size) {
         userService.findById(userId); //throws exception if user does not exist
+        Pageable pageable = OffsetPageRequest.of(from, size, Sort.by("start").descending());
         try {
             BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
             switch (bookingStatus) {
                 case ALL:
-                    return bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                    return bookingRepository.findByBookerId(userId, pageable);
                 case WAITING:
-                    return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                    return bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING, pageable);
                 case REJECTED:
-                    return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                    return bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable);
                 case CURRENT:
-                    return bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                    return bookingRepository.findByBookerIdAndStartBeforeAndEndAfter(
                             userId,
                             LocalDateTime.now(),
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            pageable
+                    );
                 case PAST:
-                    return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                    return bookingRepository.findByBookerIdAndEndBefore(userId, LocalDateTime.now(), pageable);
                 case FUTURE:
-                    return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                    return bookingRepository.findByBookerIdAndStartAfter(userId, LocalDateTime.now(), pageable);
                 default:
                     throw new IllegalArgumentException("Unknown booking status: " + status);
             }
@@ -68,26 +74,29 @@ public class BookingService {
         }
     }
 
-    public List<Booking> findByOwner(Long userId, String status) {
+    public List<Booking> findByOwner(Long userId, String status, int from, int size) {
         userService.findById(userId); //throws exception if user does not exist
+        Pageable pageable = OffsetPageRequest.of(from, size, Sort.by("start").descending());
         try {
             BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
             switch (bookingStatus) {
                 case ALL:
-                    return bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
+                    return bookingRepository.findByItemOwnerId(userId, pageable);
                 case WAITING:
-                    return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                    return bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, pageable);
                 case REJECTED:
-                    return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                    return bookingRepository.findByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageable);
                 case CURRENT:
-                    return bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                    return bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfter(
                             userId,
                             LocalDateTime.now(),
-                            LocalDateTime.now());
+                            LocalDateTime.now(),
+                            pageable
+                    );
                 case PAST:
-                    return bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                    return bookingRepository.findByItemOwnerIdAndEndBefore(userId, LocalDateTime.now(), pageable);
                 case FUTURE:
-                    return bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                    return bookingRepository.findByItemOwnerIdAndStartAfter(userId, LocalDateTime.now(), pageable);
                 default:
                     throw new IllegalArgumentException("Unknown state: " + status);
             }

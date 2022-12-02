@@ -2,74 +2,75 @@ package ru.practicum.shareit.item;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.common.exceptions.ItemNotFoundException;
-import ru.practicum.shareit.common.exceptions.UserIsNotOwnerException;
-import ru.practicum.shareit.common.exceptions.UserNotFoundException;
-import ru.practicum.shareit.item.dto.ItemDtoOut;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.common.OffsetPageRequest;
+import ru.practicum.shareit.common.exceptions.*;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ItemServiceTest {
     private User user1;
-    private User user2;
     private Item item1;
     private Item item2;
-    private Item item3;
 
     @Autowired
     private ItemService itemService;
 
-    @Autowired
-    private UserService userService;
+    @MockBean
+    private UserService mockUserService;
+
+    @MockBean
+    private ItemRepository mockItemRepository;
+
+    @MockBean
+    private CommentRepository mockCommentRepository;
+
+    @MockBean
+    private BookingRepository mockBookingRepository;
 
     @BeforeEach
     void setUp() {
-        user1 = User.builder()
-                .id(1L)
-                .email("user1@user.com")
-                .name("user1")
-                .build();
-        user2 = User.builder()
-                .id(2L)
-                .email("user2@user.com")
-                .name("user2")
-                .build();
+        user1 = User.builder().id(1L).build();
         item1 = Item.builder()
                 .id(1L)
                 .name("Item1")
                 .description("Item1 description")
                 .available(true)
+                .owner(user1)
                 .build();
         item2 = Item.builder()
                 .id(2L)
                 .name("Item2")
-                .description("Item2 interesting description")
-                .available(true)
-                .build();
-        item3 = Item.builder()
-                .id(3L)
-                .name("Item3")
-                .description("Unavailable interesting item")
+                .description("Unavailable item")
                 .available(false)
+                .owner(user1)
                 .build();
-        userService.create(user1);
-        userService.create(user2);
+        Mockito.when(mockUserService.findById(1L)).thenReturn(user1);
+        Mockito.when(mockItemRepository.save(item1)).thenReturn(item1);
+        Mockito.when(mockItemRepository.findById(1L)).thenReturn(Optional.of(item1));
+        Mockito.when(mockItemRepository.findById(2L)).thenReturn(Optional.of(item2));
+        Mockito.when(mockUserService.findById(-1L)).thenThrow(UserNotFoundException.class);
     }
 
     @Test
     void createTest() {
-        itemService.create(item1, user1.getId());
-        ItemDtoOut actualItem = itemService.findById(1L, user2.getId());
-        assertEquals(ItemMapper.toItemDtoOut(item1), actualItem);
+        assertEquals(item1, itemService.create(item1, 1L));
+        Mockito.verify(mockItemRepository, Mockito.times(1)).save(item1);
     }
 
     @Test
@@ -78,39 +79,132 @@ class ItemServiceTest {
     }
 
     @Test
-    void updatePartial() {
-        itemService.create(item1, user1.getId());
+    void findTest() {
+        assertEquals(ItemMapper.toItemDtoOut(item1), itemService.findById(1L, 1L));
+        Mockito.verify(mockItemRepository, Mockito.times(1)).findById(1L);
+    }
+
+    @Test
+    void findNonExistingTest() {
+        assertThrows(ItemNotFoundException.class, () -> itemService.findById(-1L, 1L));
+    }
+
+    @Test
+    void updateAllFieldsTest() {
+        Item itemUpdated = Item.builder()
+                .id(1L)
+                .name("updated name")
+                .description("updated description")
+                .owner(user1)
+                .available(false)
+                .build();
+        assertEquals(itemUpdated, itemService.update(itemUpdated, 1L));
+        Mockito.verify(mockItemRepository, Mockito.times(1)).save(itemUpdated);
+    }
+
+    @Test
+    void updatePartialTest() {
         Item itemUpdated = Item.builder()
                 .id(1L)
                 .description("updated description")
                 .build();
-        itemService.update(itemUpdated, user1.getId());
-        assertEquals(item1.getName(), itemService.findById(1L, user1.getId()).getName());
-        assertEquals(itemUpdated.getDescription(), itemService.findById(1L, user1.getId()).getDescription());
+        Item itemReturned = itemService.update(itemUpdated, 1L);
+        assertEquals(item1.getName(), itemReturned.getName());
+        assertEquals(itemUpdated.getDescription(), itemReturned.getDescription());
+        assertEquals(item1.getAvailable(), itemReturned.getAvailable());
+        Mockito.verify(mockItemRepository, Mockito.times(1)).save(Mockito.any(Item.class));
     }
 
     @Test
-    void updateNotExisting() {
-        assertThrows(ItemNotFoundException.class, () -> itemService.update(item1, 1L));
+    void updateNotExistingTest() {
+        assertThrows(ItemNotFoundException.class, () -> itemService.update(Item.builder().id(-1L).build(), 1L));
     }
 
     @Test
-    void updateInvalidUser() {
-        itemService.create(item1, user1.getId());
+    void updateInvalidUserTest() {
         assertThrows(UserNotFoundException.class, () -> itemService.update(item1, -1L));
     }
 
     @Test
-    void updateNotOwner() {
-        itemService.create(item1, user1.getId());
+    void updateNotOwnerTest() {
         assertThrows(UserIsNotOwnerException.class, () -> itemService.update(item1, 2L));
     }
 
     @Test
-    void findByTestEmpty() {
-        itemService.create(item1, user1.getId());
-        itemService.create(item2, user2.getId());
-        itemService.create(item3, user2.getId());
-        assertEquals(List.of(), itemService.findByText(""));
+    void findByOwnerTest() {
+        Mockito.when(mockItemRepository.findByOwnerId(1L, OffsetPageRequest.of(0, 20)))
+                .thenReturn(List.of(item1));
+        assertEquals(List.of(ItemMapper.toItemDtoOut(item1)), itemService.findByOwner(1L, 0, 20));
+        Mockito.verify(mockItemRepository, Mockito.times(1))
+                .findByOwnerId(1L, OffsetPageRequest.of(0, 20));
+    }
+
+    @Test
+    void findForBookingByIdTest() {
+        assertEquals(item1, itemService.findForBookingById(1L, 2L));
+        Mockito.verify(mockItemRepository, Mockito.times(1)).findById(1L);
+    }
+
+    @Test
+    void findForBookingByIdOwnerTest() {
+        assertThrows(ItemNotFoundException.class, () -> itemService.findForBookingById(1L, 1L));
+    }
+
+    @Test
+    void findForBookingByIdNotAvailableTest() {
+        assertThrows(ItemNotAvailableException.class, () -> itemService.findForBookingById(2L, 2L));
+    }
+
+    @Test
+    void findByTextTest() {
+        Mockito.when(mockItemRepository.findByText("Item1", OffsetPageRequest.of(0, 20)))
+                .thenReturn(List.of(item2));
+        assertEquals(List.of(item2), itemService.findByText("Item1", 0, 20));
+        Mockito.verify(mockItemRepository, Mockito.times(1))
+                .findByText("Item1", OffsetPageRequest.of(0, 20));
+    }
+
+    @Test
+    void findByTextEmptyTest() {
+        assertEquals(List.of(), itemService.findByText("", 0, 20));
+        Mockito.verify(mockItemRepository, Mockito.never()).findByText(Mockito.anyString(), Mockito.any(OffsetPageRequest.class));
+    }
+
+    @Test
+    void deleteTest() {
+        itemService.deleteById(1L);
+        Mockito.verify(mockItemRepository, Mockito.times(1)).deleteById(1L);
+    }
+
+    @Test
+    void addCommentTest() {
+        Mockito.when(mockBookingRepository.findByItemIdAndStatus(Mockito.anyLong(), Mockito.any(BookingStatus.class)))
+                .thenReturn(List.of(Booking.builder()
+                        .start(LocalDateTime.now().minusDays(1))
+                        .end(LocalDateTime.now())
+                        .item(item1)
+                        .booker(user1)
+                        .status(BookingStatus.APPROVED)
+                        .build()));
+        Comment comment = Comment.builder()
+                .id(1L)
+                .item(item1)
+                .author(user1)
+                .text("test comment")
+                .build();
+        Mockito.when(mockCommentRepository.save(comment)).thenReturn(comment);
+        assertEquals(comment, itemService.addComment(1L, 1L,comment));
+        Mockito.verify(mockCommentRepository, Mockito.times(1)).save(comment);
+    }
+
+    @Test
+    void addCommentNotBookedTest() {
+        Comment comment = Comment.builder()
+                .id(1L)
+                .item(item1)
+                .author(user1)
+                .text("test comment")
+                .build();
+        assertThrows(ItemNeverBookedByUserException.class, () -> itemService.addComment(1L, 2L, comment));
     }
 }

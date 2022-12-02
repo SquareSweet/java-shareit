@@ -3,7 +3,9 @@ package ru.practicum.shareit.item;
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoOut;
+import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoShort;
+import ru.practicum.shareit.request.ItemRequest;
 
 @UtilityClass
 public class ItemMapper {
@@ -14,7 +16,7 @@ public class ItemMapper {
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .owner(item.getOwner())
-                .request(item.getRequest())
+                .requestId(item.getRequest() == null ? null : item.getRequest().getId())
                 .build();
     }
 
@@ -25,7 +27,9 @@ public class ItemMapper {
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
                 .owner(itemDto.getOwner())
-                .request(itemDto.getRequest())
+                .request(itemDto.getRequestId() == null ? null : ItemRequest.builder()
+                        .id(itemDto.getRequestId())
+                        .build())
                 .build();
     }
 
@@ -55,6 +59,16 @@ public class ItemMapper {
                 .available(itemDtoOut.getAvailable())
                 .owner(itemDtoOut.getOwner())
                 .request(itemDtoOut.getRequest())
+                .build();
+    }
+
+    public static ItemDtoRequest toItemDtoRequest(Item item) {
+        return ItemDtoRequest.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getRequest() == null ? null : item.getRequest().getId())
                 .build();
     }
 }

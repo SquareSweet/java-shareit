@@ -28,7 +28,8 @@ public class ErrorHandler {
         response.sendError(HttpStatus.FORBIDDEN.value());
     }
 
-    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class, BookingNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class, BookingNotFoundException.class,
+            ItemRequestNotFound.class})
     public void handleNotFound(HttpServletResponse response, Exception exception) throws IOException {
         log.debug(exception.getMessage());
         response.sendError(HttpStatus.NOT_FOUND.value());

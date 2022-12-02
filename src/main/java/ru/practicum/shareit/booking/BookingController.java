@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingDtoCreate;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -32,9 +33,11 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> findByBooker(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(value = "state", required = false, defaultValue = "ALL") String status) {
+            @RequestParam(value = "state", required = false, defaultValue = "ALL") String status,
+            @RequestParam Optional<Integer> from,
+            @RequestParam Optional<Integer> size) {
 
-        return bookingService.findByBooker(userId, status).stream()
+        return bookingService.findByBooker(userId, status, from.orElse(0), size.orElse(20)).stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
@@ -42,9 +45,11 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> findByOwner(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(value = "state", required = false, defaultValue = "ALL") String status) {
+            @RequestParam(value = "state", required = false, defaultValue = "ALL") String status,
+            @RequestParam Optional<Integer> from,
+            @RequestParam Optional<Integer> size) {
 
-        return bookingService.findByOwner(userId, status).stream()
+        return bookingService.findByOwner(userId, status, from.orElse(0), size.orElse(20)).stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
