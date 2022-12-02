@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -132,11 +133,11 @@ class ItemServiceTest {
 
     @Test
     void findByOwnerTest() {
-        Mockito.when(mockItemRepository.findByOwnerId(1L, OffsetPageRequest.of(0, 20)))
+        Mockito.when(mockItemRepository.findByOwnerId(1L, OffsetPageRequest.of(0, 20, Sort.by("id"))))
                 .thenReturn(List.of(item1));
         assertEquals(List.of(ItemMapper.toItemDtoOut(item1)), itemService.findByOwner(1L, 0, 20));
         Mockito.verify(mockItemRepository, Mockito.times(1))
-                .findByOwnerId(1L, OffsetPageRequest.of(0, 20));
+                .findByOwnerId(1L, OffsetPageRequest.of(0, 20, Sort.by("id")));
     }
 
     @Test
@@ -157,11 +158,11 @@ class ItemServiceTest {
 
     @Test
     void findByTextTest() {
-        Mockito.when(mockItemRepository.findByText("Item1", OffsetPageRequest.of(0, 20)))
+        Mockito.when(mockItemRepository.findByText("Item1", OffsetPageRequest.of(0, 20, Sort.by("id"))))
                 .thenReturn(List.of(item2));
         assertEquals(List.of(item2), itemService.findByText("Item1", 0, 20));
         Mockito.verify(mockItemRepository, Mockito.times(1))
-                .findByText("Item1", OffsetPageRequest.of(0, 20));
+                .findByText("Item1", OffsetPageRequest.of(0, 20, Sort.by("id")));
     }
 
     @Test

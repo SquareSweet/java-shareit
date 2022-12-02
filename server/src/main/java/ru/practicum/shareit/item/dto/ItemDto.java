@@ -5,23 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemDto {
     Long id;
-
-    @NotBlank(message = "Item name should not be blank")
     String name;
-
-    @NotBlank(message = "Item description should not be blank")
     String description;
-
-    @NotNull(message = "Item availability should be specified")
     Boolean available;
-
     Long requestId;
 }

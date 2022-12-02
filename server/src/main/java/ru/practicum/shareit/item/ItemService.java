@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -99,7 +100,7 @@ public class ItemService {
     }
 
     public List<ItemDtoOut> findByOwner(Long userId, int from, int size) {
-        return itemRepository.findByOwnerId(userId, OffsetPageRequest.of(from, size)).stream()
+        return itemRepository.findByOwnerId(userId, OffsetPageRequest.of(from, size, Sort.by("id"))).stream()
                 .map(ItemMapper::toItemDtoOut)
                 .map(i -> fillBookings(i, userId))
                 .map(i -> fillComments(i))
@@ -110,7 +111,7 @@ public class ItemService {
         if (text == null || text.isBlank()) {
             return List.of();
         }
-        return itemRepository.findByText(text, OffsetPageRequest.of(from, size));
+        return itemRepository.findByText(text, OffsetPageRequest.of(from, size, Sort.by("id")));
     }
 
     public Comment addComment(Long itemId, Long userId, Comment comment) {

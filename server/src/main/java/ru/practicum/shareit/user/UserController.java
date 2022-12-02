@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping()
-    public UserDto create(@Valid @RequestBody UserDto userDto) {
+    public UserDto create(@RequestBody UserDto userDto) {
         User user = UserMapper.toUser(userDto);
         return UserMapper.toUserDto(userService.create(user));
     }
